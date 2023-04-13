@@ -93,7 +93,14 @@ class UserController extends BaseController
      */
     public function getLoggedInUser()
     {
+        $loggedInUser = Auth::user();
+
+        // return error response
+        if (!isset($loggedInUser->id)) {
+            return $this->sendError('No logged in user found.', ['error' => 'No logged in user found.']);
+        }
+
         // return response
-        return $this->sendResponse(new UserResource(Auth::user()), 'User details successfully fetched.');
+        return $this->sendResponse(new UserResource($loggedInUser ?? null), 'Logged in user details successfully fetched.');
     }
 }

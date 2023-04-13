@@ -12,12 +12,7 @@ import 'ant-design-vue/dist/antd.css';
 window.BASE_URL = import.meta.env.VITE_BASE_URL;
 
 router.beforeEach((to, from) => {
-    /**
-     * Though being used as the redirection process checker.
-     * LocalStorage token will not be utilized in the API request process since I am using Laravel - Sanctum.
-     * The API call authentication will be validated through laravel_session and XSRF-TOKEN cookies in the headers.
-     * 
-     */
+    // make sure to check for token stored when not in login page
     if (!_.isEqualWith(to.name, 'login') && _.isEmpty(localStorage.getItem('token'))) {
         router.push({ 'name': 'login' });
     }

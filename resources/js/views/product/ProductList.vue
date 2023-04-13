@@ -22,7 +22,7 @@
 </template>
 <script>
 import { usePagination } from 'vue-request';
-import { computed, defineComponent, onMounted, h } from 'vue';
+import { computed, defineComponent } from 'vue';
 import { useStore } from 'vuex';
 import _ from 'lodash';
 
@@ -36,7 +36,7 @@ export default defineComponent({
     setup() {
         const categoryFilter = [];
         const store = useStore();
-        const loggedInUserDetails = computed(() => store.getters.loggedInUserDetails );
+
         const columns = [{
             title: 'Name',
             dataIndex: 'name',
@@ -59,13 +59,6 @@ export default defineComponent({
             filters: categoryFilter,
             width: '20%',
         }];
-
-        onMounted(() => {
-            // get user details
-            if (_.isUndefined(loggedInUserDetails) || !_.has(loggedInUserDetails, 'id')) {
-                store.dispatch('getLoggedInUser');
-            }
-        })
 
         function intializeData (params) {
             const queryParams = {

@@ -12,14 +12,18 @@ export default {
     mutations: {
         setLoggedInUserDetails(state, userDetails) {
             state.loggedInUserDetails = userDetails
+            console.log('setLoggedInUserDetails', userDetails);
         }
     },
     actions: {
         getLoggedInUser: ({ commit, state }, data) => {
+            commit('setLoggedInUserDetails', {});
+
             return axios.get(`${window.BASE_URL}/api/logged-in-user`, {
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-            }).then((response) => {
+            }).then(response => {
                 commit('setLoggedInUserDetails', response.data.data);
+                return response;
             });
         }
     },

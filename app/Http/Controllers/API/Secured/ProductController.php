@@ -100,6 +100,7 @@ class ProductController extends BaseController
      */
     public function show(string $id)
     {
+        // To do: need to add further filterization to exclude none valid product to view
         $product = $this->repository->getRecordbyId((int) $id);
 
         // return error response

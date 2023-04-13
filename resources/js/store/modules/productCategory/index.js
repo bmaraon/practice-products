@@ -13,7 +13,6 @@ export default {
     mutations: {
         setProductCategoryList(state, productCategoryList) {
             state.productCategoryList = productCategoryList
-            console.log('productCategoryList', state.productCategoryList);
         },
     },
     actions: {

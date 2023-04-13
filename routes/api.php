@@ -17,14 +17,13 @@ use Illuminate\Support\Facades\Route;
 |
  */
 
-Route::controller(AuthController::class)->group(function () {
-    Route::post('register', 'register');
-    Route::post('login', 'login');
-});
+Route::post('register', [AuthController::class, 'register']);
+Route::post('login', [AuthController::class, 'login']);
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', 'validateBearerToken'])->group(function () {
     Route::get('logged-in-user', [UserController::class, 'getLoggedInUser']);
     Route::resource('users', UserController::class);
     Route::resource('product-categories', ProductCategoryController::class);
     Route::resource('products', ProductController::class);
+    Route::delete('logout', [AuthController::class, 'logout']);
 });

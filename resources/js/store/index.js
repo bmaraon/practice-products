@@ -1,5 +1,5 @@
 import { createStore } from 'vuex'
-import login from "./modules/login";
+import authentication from "./modules/authentication";
 import user from "./modules/user";
 import productCategory from "./modules/productCategory";
 import product from "./modules/product";
@@ -7,7 +7,7 @@ import product from "./modules/product";
 // Create a new store instance.
 const store = createStore({
     modules: {
-        login: login,
+        authentication: authentication,
         user: user,
         productCategory: productCategory,
         product: product,

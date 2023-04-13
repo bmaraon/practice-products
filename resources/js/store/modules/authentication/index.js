@@ -23,6 +23,13 @@ export default {
                 email: data.email,
                 password: data.password
             });
-        }
+        },
+        logoutUser: ({ }, data) => {
+            return axios.delete(`${window.BASE_URL}/api/logout`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+            }).then(response => {
+                return response;
+            });
+        },
     },
 }

@@ -6,9 +6,16 @@
                 v-model:selectedKeys="selectedKeys"
                 theme="dark"
                 mode="horizontal"
-                :style="{ lineHeight: '64px' }">
+                :style="{ lineHeight: '64px', width: '80%', float: 'left' }">
                 <a-menu-item key="1">Products</a-menu-item>
             </a-menu>
+            <a-button
+                danger
+                type="primary"
+                @click="logoutUser"
+                :style="{ marginTop: '15px', float: 'right' }">
+                Logout
+            </a-button>
         </a-layout-header>
         <a-layout-content style="padding: 0 50px">
             <a-breadcrumb style="margin: 16px 0">
@@ -19,17 +26,52 @@
             </div>
         </a-layout-content>
         <a-layout-footer style="text-align: center">
-            Ant Design ©2018 Created by Ant UED
+            Assessment by Belleo Maraon
         </a-layout-footer>
     </a-layout>
 </template>
 <script>
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref, computed, onMounted } from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 import _ from 'lodash';
 
 export default defineComponent({
     setup() {
+        const store = useStore();
+        const router = useRouter();
+        const loggedInUserDetails = computed(() => store.getters.loggedInUserDetails );
+
+        onMounted(() => {
+            console.log('onMounted loggedInUserDetails', loggedInUserDetails);
+            // check before other sub-components mounted
+            // if (_.isUndefined(loggedInUserDetails) || !_.has(loggedInUserDetails, 'id')) {
+                store.dispatch('getLoggedInUser').catch(() => {
+                    // manage local storage
+                    localStorage.removeItem('token');
+
+                    return setTimeout(() => {
+                        // redirect after getting user details
+                        router.push({ 'name' : 'login' });
+                    }, 1000);
+                });
+            // }
+        });
+
+        const logoutUser = () => {
+            return store.dispatch('logoutUser').then(() => {
+                // manage local storage
+                localStorage.removeItem('token');
+
+                return setTimeout(() => {
+                    // redirect after getting user details
+                    router.push({ 'name' : 'login' });
+                }, 1000);
+            });
+        }
+
         return {
+            logoutUser,
             tokenExists: !_.isEmpty(localStorage.getItem('token')),
             selectedKeys: ref(['1']),
         };

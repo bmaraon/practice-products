@@ -9,26 +9,26 @@
                         name="nest-messages"
                         :validate-messages="validateMessages"
                         @finish="onFinish">
-                        <a-form-item readonly :name="name" label="Name" :rules="[{ required: true }]">
+                        <a-form-item readonly :name="name" label="Name">
                             <a-input v-model:value="formState.product.name" />
                         </a-form-item>
-                        <!-- <a-form-item :name="['product', 'description']" label="Description" :rules="[{ type: 'string' }]">
+                        <a-form-item :name="['product', 'description']" label="Description">
                             <a-input v-model:value="formState.product.description" />
                         </a-form-item>
-                        <a-form-item :name="['product', 'quantity']" label="Quantity" :rules="[{ type: 'number', min: 0, max: 99 }]">
+                        <a-form-item :name="['product', 'quantity']" label="Quantity">
                             <a-input-number v-model:value="formState.product.quantity" />
                         </a-form-item>
                         <a-form-item :name="['product', 'price']" label="Price">
                             <a-input v-model:value="formState.product.price" />
                         </a-form-item>
-                        <a-form-item :name="['product', 'product_category']" label="product_category">
-                            <a-textarea v-model:value="formState.product.product_category.name" />
-                        </a-form-item> -->
+                        <a-form-item :name="['product', 'product_category_name']" label="Product Category">
+                            <a-textarea v-model:value="formState.product.product_category_name" />
+                        </a-form-item>
                         <!-- <a-form-item :wrapper-col="{ ...layout.wrapperCol, offset: 8 }">
                             <a-button type="primary" html-type="submit">Submit</a-button>
                         </a-form-item> -->
                         <a-form-item :wrapper-col="{ ...layout.wrapperCol, offset: 8 }">
-                            <a-button type="primary" html-type="button">Back to List</a-button>
+                            <a-button type="primary" html-type="button" @click="backToList">Back to List</a-button>
                         </a-form-item>
                     </a-form>
                 </a-col>
@@ -37,8 +37,8 @@
     </MainLayout>
 </template>
 <script>
-import { defineComponent, reactive, onMounted, computed } from 'vue';
-import { useRoute  } from 'vue-router';
+import { defineComponent, reactive, onMounted, computed, watch } from 'vue';
+import { useRoute, useRouter  } from 'vue-router';
 import { useStore } from 'vuex';
 import _ from 'lodash';
 
@@ -51,7 +51,7 @@ export default defineComponent({
     setup() {
         const store = useStore();
         const route = useRoute();
-        const loggedInUserDetails = computed(() => store.getters.loggedInUserDetails );
+        const router = useRouter();
         const productDetails = computed(() => store.getters.productDetails );
 
         const layout = {
@@ -75,18 +75,35 @@ export default defineComponent({
         };
 
         const formState = reactive({
-            product: productDetails,
+            product: {
+                name: '',
+                description: '',
+                quantity: 0,
+                price: 0,
+                product_category_name: ''
+            },
         });
 
         onMounted(() => {
-            // get user details
-            if (_.isUndefined(loggedInUserDetails) || !_.has(loggedInUserDetails, 'id')) {
-                store.dispatch('getLoggedInUser')
-                    .then(() => {
-                        store.dispatch('getProductDetails', { id: route.params.id });
-                    });
-            }
+            // get product categories
+            store.dispatch('getProductDetails', { id: route.params.id });
         })
+
+        watch(productDetails, async (newProduct, oldProduct) => {
+            if (!_.isUndefined(newProduct) && !_.isNull(newProduct)) {
+                formState.product = {...newProduct, ...{
+                    product_category_name:
+                        !_.isUndefined(newProduct.product_category)
+                        && !_.isNull(newProduct.product_category.name)
+                        ? newProduct.product_category.name : ''
+                }};
+            }
+        });
+
+        const backToList = () => {
+            // redirect after getting user details
+            router.push({ 'name' : 'product-list' });
+        }
 
         const onFinish = values => {
             console.log('Success:', values);
@@ -96,6 +113,7 @@ export default defineComponent({
             formState,
             onFinish,
             layout,
+            backToList,
             validateMessages,
         };
     },
