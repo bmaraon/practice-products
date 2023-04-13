@@ -7,12 +7,15 @@ use App\Criterias\Product\WithUserAgeRestriction;
 use App\Http\Controllers\API\BaseController as BaseController;
 use App\Http\Resources\ProductResource;
 use App\Repositories\ProductRepository;
+use App\Traits\ConvertionTraits;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class ProductController extends BaseController
 {
+    use ConvertionTraits;
+
     /**
      * Class Constructor
      *
@@ -33,9 +36,10 @@ class ProductController extends BaseController
      */
     public function index(Request $request)
     {
+        $categoryIds = [];
+
         // with user age restriction
         if ($request->filled('withUserAgeRestriction')) {
-            $categoryId                   = null;
             $withUserAgeRestriction       = !empty($request->get('withUserAgeRestriction')) ? $request->get('withUserAgeRestriction') : 0;
             $includeWithoutAgeRestriction = 0;
 
@@ -44,9 +48,10 @@ class ProductController extends BaseController
                 ? $request->get('includeWithoutAgeRestriction') : $includeWithoutAgeRestriction;
             }
 
-            // filter by categoryId
-            if ($request->filled('categoryId')) {
-                $categoryId = !empty($request->get('categoryId')) ? $request->get('categoryId') : $categoryId;
+            // filter by categoryIds
+            if ($request->filled('categoryIds')) {
+                $categoryIds = !empty($request->get('categoryIds')) ? explode(',', $request->get('categoryIds')) : $categoryIds;
+                $categoryIds = count($categoryIds) ? array_map([$this, 'convertToInt'], $categoryIds) : $categoryIds;
             }
 
             // invoke criteria
@@ -57,17 +62,18 @@ class ProductController extends BaseController
                         Auth::user()->age,
                         $minUseAge = 18,
                         $maxUserAge = 30,
-                        $categoryId,
+                        $categoryIds,
                     )
                 );
             }
         } else {
-            // filter by categoryId
-            if ($request->filled('categoryId')) {
-                $categoryId = !empty($request->get('categoryId')) ? $request->get('categoryId') : 0;
+            // filter by categoryIds
+            if ($request->filled('categoryIds')) {
+                $categoryIds = !empty($request->get('categoryIds')) ? explode(',', $request->get('categoryIds')) : $categoryIds;
+                $categoryIds = count($categoryIds) ? array_map([$this, 'convertToInt'], $categoryIds) : $categoryIds;
 
                 // invoke criteria
-                $this->repository->pushCriteria(new FilterByCategory($categoryId));
+                $this->repository->pushCriteria(new FilterByCategory($categoryIds));
             }
         }
 

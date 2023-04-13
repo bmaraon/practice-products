@@ -23,6 +23,7 @@ Route::controller(AuthController::class)->group(function () {
 });
 
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('logged-in-user', [UserController::class, 'getLoggedInUser']);
     Route::resource('users', UserController::class);
     Route::resource('product-categories', ProductCategoryController::class);
     Route::resource('products', ProductController::class);

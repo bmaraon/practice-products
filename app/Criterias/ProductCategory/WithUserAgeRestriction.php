@@ -69,14 +69,14 @@ class WithUserAgeRestriction implements CriteriaInterface
         $includeWithoutAgeRestriction = $this->includeWithoutAgeRestriction;
 
         return $model->leftJoin('product_category_access', 'product_category_access.product_category_id', '=', 'product_categories.id')
-            ->when($triggerUserAgeRestriction, function ($query) use ($minUserAge, $maxUserAge) {
+            ->when(!empty($triggerUserAgeRestriction), function ($query) use ($minUserAge, $maxUserAge) {
                 $query->where(function ($query) use ($minUserAge, $maxUserAge) {
                     $query->whereNotNull('product_category_access.id')
                         ->whereRaw("product_category_access.min_user_age >= $minUserAge")
                         ->whereRaw("product_category_access.max_user_age <= $maxUserAge");
                 });
             })
-            ->when($includeWithoutAgeRestriction, function ($query) {
+            ->when(!empty($includeWithoutAgeRestriction), function ($query) {
                 $query->orWhereNull('product_category_access.id');
             })
             ->select(DB::raw('product_categories.*'));

@@ -36,7 +36,6 @@ class AuthController extends BaseController
         $user = User::create($input);
 
         return $this->sendResponse([
-            'name'  => $user->name,
             'token' => $user->createToken('userlution-web-portal')->plainTextToken,
         ], 'User register successfully.');
     }
@@ -57,7 +56,6 @@ class AuthController extends BaseController
             $success['name']  = $user->name;
 
             return $this->sendResponse([
-                'name'  => $user->name,
                 'token' => $user->createToken('userlution-web-portal')->plainTextToken,
             ], 'User login successfully.');
         } else {

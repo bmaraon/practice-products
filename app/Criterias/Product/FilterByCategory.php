@@ -10,19 +10,19 @@ class FilterByCategory implements CriteriaInterface
      * @var int
      *
      */
-    protected $productCategoryId;
+    protected $productCategoryIds;
 
     /**
      * Class Constructor
      *
      * @param $model
-     * @param int $productCategoryId
+     * @param int $productCategoryIds
      * @return void
      *
      */
-    public function __construct($productCategoryId)
+    public function __construct($productCategoryIds)
     {
-        $this->productCategoryId = (int) $productCategoryId;
+        $this->productCategoryIds = (array) $productCategoryIds;
     }
 
     /**
@@ -35,6 +35,6 @@ class FilterByCategory implements CriteriaInterface
      */
     public function apply($model)
     {
-        return $model->where('products.product_category_id', $this->productCategoryId);
+        return $model->whereIn('products.product_category_id', $this->productCategoryIds);
     }
 }

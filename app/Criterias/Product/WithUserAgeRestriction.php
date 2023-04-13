@@ -40,7 +40,7 @@ class WithUserAgeRestriction implements CriteriaInterface
      * @var int
      *
      */
-    protected $categoryId;
+    protected $categoryIds;
 
     /**
      * Class Constructor
@@ -50,16 +50,16 @@ class WithUserAgeRestriction implements CriteriaInterface
      * @param int $userAge
      * @param int $minUserAge
      * @param int $maxUserAge
-     * @param int $categoryId
+     * @param int $categoryIds
      * @return void
      *
      */
-    public function __construct($includeWithoutAgeRestriction, $userAge, $minUserAge, $maxUserAge, $categoryId)
+    public function __construct($includeWithoutAgeRestriction, $userAge, $minUserAge, $maxUserAge, $categoryIds)
     {
         $this->includeWithoutAgeRestriction = (int) $includeWithoutAgeRestriction;
+        $this->categoryIds                  = (array) $categoryIds;
         $this->minUserAge                   = (int) $minUserAge;
         $this->maxUserAge                   = (int) $maxUserAge;
-        $this->categoryId                   = (int) $categoryId;
         $this->userAge                      = (int) $userAge;
     }
 
@@ -75,25 +75,29 @@ class WithUserAgeRestriction implements CriteriaInterface
     {
         $minUserAge                   = $this->minUserAge;
         $maxUserAge                   = $this->maxUserAge;
-        $categoryId                   = $this->categoryId;
+        $categoryIds                  = $this->categoryIds;
         $triggerUserAgeRestriction    = $this->userAge >= $this->minUserAge && $this->userAge <= $this->maxUserAge;
         $includeWithoutAgeRestriction = $this->includeWithoutAgeRestriction;
 
         return $model->leftJoin('product_category_access', 'product_category_access.product_category_id', '=', 'products.product_category_id')
-            ->when($categoryId, function ($query) use ($categoryId) {
-                $query->where('products.product_category_id', $categoryId);
+            ->when(!empty($categoryIds), function ($query) use ($categoryIds) {
+                $query->whereIn('products.product_category_id', $categoryIds);
             })
-            ->where(function ($query) use ($triggerUserAgeRestriction, $includeWithoutAgeRestriction, $minUserAge, $maxUserAge, $categoryId) {
-                $query->when($triggerUserAgeRestriction, function ($query) use ($includeWithoutAgeRestriction, $minUserAge, $maxUserAge, $categoryId) {
-                    $query->where(function ($query) use ($minUserAge, $maxUserAge, $categoryId) {
+            ->where(function ($query) use ($triggerUserAgeRestriction, $includeWithoutAgeRestriction, $minUserAge, $maxUserAge, $categoryIds) {
+                $query->when(!empty($triggerUserAgeRestriction), function ($query) use ($includeWithoutAgeRestriction, $minUserAge, $maxUserAge, $categoryIds) {
+                    $query->where(function ($query) use ($minUserAge, $maxUserAge, $categoryIds) {
                         $query->whereNotNull('product_category_access.id')
-                            ->where('product_category_access.product_category_id', $categoryId)
                             ->whereRaw("product_category_access.min_user_age >= $minUserAge")
-                            ->whereRaw("product_category_access.max_user_age <= $maxUserAge");
-                    })->when($includeWithoutAgeRestriction, function ($query) use ($categoryId) {
-                        $query->orWhere(function ($query) use ($categoryId) {
+                            ->whereRaw("product_category_access.max_user_age <= $maxUserAge")
+                            ->when(!empty($categoryIds), function ($query) use ($categoryIds) {
+                                $query->whereIn('product_category_access.product_category_id', $categoryIds);
+                            });
+                    })->when(!empty($includeWithoutAgeRestriction), function ($query) use ($categoryIds) {
+                        $query->orWhere(function ($query) use ($categoryIds) {
                             $query->whereNull('product_category_access.id')
-                                ->where('products.product_category_id', $categoryId);
+                                ->when(!empty($categoryIds), function ($query) use ($categoryIds) {
+                                    $query->whereIn('products.product_category_id', $categoryIds);
+                                });
                         });
                     });
                 });

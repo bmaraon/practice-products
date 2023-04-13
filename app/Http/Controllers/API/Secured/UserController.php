@@ -9,6 +9,7 @@ use App\Http\Resources\UserResource;
 use App\Repositories\UserRepository;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Response;
 
 class UserController extends BaseController
@@ -82,5 +83,17 @@ class UserController extends BaseController
 
         // return response
         return $this->sendResponse(new UserResource($user), 'User details successfully fetched.');
+    }
+
+    /**
+     * Get logged in user
+     *
+     * @return JsonResponse
+     *
+     */
+    public function getLoggedInUser()
+    {
+        // return response
+        return $this->sendResponse(new UserResource(Auth::user()), 'User details successfully fetched.');
     }
 }
