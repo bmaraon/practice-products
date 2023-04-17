@@ -13,8 +13,8 @@ Clone repository from this link: `https://github.com/bmaraon/product-management`
 To run this project, please refer to this environment variables.
 #### .env
 ```
-APP_NAME=Laravel
-APP_ENV="Product Management"
+APP_NAME="Product Management"
+APP_ENV=local
 APP_KEY=
 APP_DEBUG=true
 APP_URL=http://localhost:9001
@@ -72,7 +72,6 @@ VITE_PUSHER_HOST="${PUSHER_HOST}"
 VITE_PUSHER_PORT="${PUSHER_PORT}"
 VITE_PUSHER_SCHEME="${PUSHER_SCHEME}"
 VITE_PUSHER_APP_CLUSTER="${PUSHER_APP_CLUSTER}"
-
 ```
 #### vite.config.js
 ```
